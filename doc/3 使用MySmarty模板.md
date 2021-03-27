@@ -289,12 +289,6 @@ type = 2
 {else}
 type = 3
 {/if}
-
-{if $type == 1}
-type = 1
-{else if $type == 2}
-type = 2
-{/if}
 ```
 
 **万能语法**
