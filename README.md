@@ -68,7 +68,7 @@ server {
     #域名
     server_name localhost;
     #代码位置
-root /usr/share/nginx/html/mysmarty/public;
+    root /usr/share/nginx/html/mysmarty/public;
     #首页默认文件
     index index.html index.htm index.php;
     #文件编码
