@@ -41,7 +41,7 @@ chmod -R 740 mysmarty/runtime
 chmod -R 740 mysmarty/public/upload
 ```
 
-​	确保`/mysmarty/public/runtime`具有可读可写权限
+​	确保`mysmarty/public/runtime`具有可读可写权限
 
 ```
 chmod -R 740 mysmarty/public/runtime
