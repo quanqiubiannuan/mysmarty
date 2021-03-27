@@ -19,7 +19,7 @@ class Start
      */
     public static function initCommon(): void
     {
-        define('MYSMARTY_VERSION', '1.0.1');
+        define('MYSMARTY_VERSION', '1.0.2');
         define('APPLICATION_DIR', ROOT_DIR . '/application');
         define('EXTEND_DIR', ROOT_DIR . '/extend');
         define('PUBLIC_DIR', ROOT_DIR . '/public');
@@ -58,10 +58,8 @@ class Start
             Console::start();
             exit();
         }
-        // 输出X-Powered-By信息
-        if (!empty(config('app.x_powered_by'))) {
-            header('X-Powered-By:' . config('app.x_powered_by'));
-        }
+        // 移除X-Powered-By信息
+        header_remove('X-Powered-By');
         // session开启
         if (config('session.status') === 1) {
             startSession();

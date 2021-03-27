@@ -201,4 +201,22 @@ class Controller
     {
         $this->mySmarty->assign($key, $value);
     }
+
+    /**
+     * 删除模板缓存文件目录
+     * @return bool
+     */
+    final protected function clearTemplateDirCache(): bool
+    {
+        return $this->mySmarty->clearTemplateDirCache();
+    }
+
+    /**
+     * 清空内容缓存，包括配置、路由缓存
+     * @return bool
+     */
+    final protected function clearCache(): bool
+    {
+        return $this->mySmarty->clearCache();
+    }
 }

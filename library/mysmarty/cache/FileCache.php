@@ -39,16 +39,7 @@ class FileCache extends BaseCache
      */
     public function purge(): bool
     {
-        $files = scandir($this->cacheDir);
-        if (count($files) > 2) {
-            foreach ($files as $v) {
-                if ($v !== '.' && $v !== '..') {
-                    unlink($this->cacheDir . '/' . $v);
-                }
-            }
-            return true;
-        }
-        return false;
+        return removeDir($this->cacheDir);
     }
 
     /**

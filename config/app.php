@@ -6,10 +6,6 @@
 return [
     // 调试，false 关闭，true 开启
     'debug' => true,
-    // nginx转发的请求参数名称。rewrite ^(.*)$ /index.php?s=$1 last;
-    'query_str' => 's',
-    // 设置X-Powered-By信息，支持中文
-    'x_powered_by' => 'MySmarty',
     // 应用初始化执行方法
     'app_init' => '',
     // 加密 key，定义之后不要修改，否则会导致之前加密的数据无法解密

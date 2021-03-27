@@ -1,6 +1,8 @@
 <?php
 
 namespace library\mysmarty;
+use library\mysmarty\cache\RedisCache;
+
 /**
  * 模板解析
  */
@@ -529,5 +531,27 @@ class Template
     public function setConfigDir(string $configDir): void
     {
         $this->configDir = $configDir;
+    }
+
+    /**
+     * 删除模板缓存文件目录
+     * @return bool
+     */
+    public function clearTemplateDirCache(): bool
+    {
+        return removeDir(RUNTIME_DIR . '/templates_c');
+    }
+
+    /**
+     * 清空内容缓存，包括配置、路由缓存
+     * @return bool
+     */
+    public function clearCache(): bool
+    {
+        if ('redis' === $this->cachingType) {
+            $cacheClass = RedisCache::class;
+            (new $cacheClass())->purge();
+        }
+        return removeDir(RUNTIME_DIR . '/cache');
     }
 }

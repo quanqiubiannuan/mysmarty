@@ -158,17 +158,43 @@ function paiban(string $str, bool $downloadImg = true): string
  */
 function downloadImg(string $imgSrc): string|bool
 {
-    if (0 !== stripos($imgSrc, 'http')) {
+    $data = '';
+    if (0 === stripos($imgSrc, 'http')) {
+        if (preg_match('/\.jpg/i', $imgSrc)) {
+            $hz = 'jpg';
+        } else if (preg_match('/\.jpeg/i', $imgSrc)) {
+            $hz = 'jpeg';
+        } else if (preg_match('/\.gif/i', $imgSrc)) {
+            $hz = 'gif';
+        } else {
+            $hz = 'png';
+        }
+        $data = Query::getInstance()->setPcUserAgent()
+            ->setRandIp()
+            ->setUrl($imgSrc)
+            ->getOne();
+    } else if (0 === stripos($imgSrc, 'data:image')) {
+        if (preg_match('~^data:image/(.+);base64,~i', $imgSrc, $mat)) {
+            if (false !== stripos($mat[1], 'icon')) {
+                $hz = 'ico';
+            } else if (false !== stripos($mat[1], 'jpg')) {
+                $hz = 'jpg';
+            } else if (false !== stripos($mat[1], 'jpeg')) {
+                $hz = 'jpeg';
+            } else if (false !== stripos($mat[1], 'gif')) {
+                $hz = 'gif';
+            } else {
+                $hz = 'png';
+            }
+            $data = base64_decode(str_ireplace($mat[0], '', $imgSrc));
+        } else {
+            return false;
+        }
+    } else {
         return false;
     }
-    if (preg_match('/\.jpg/i', $imgSrc)) {
-        $hz = 'jpg';
-    } else if (preg_match('/\.jpeg/i', $imgSrc)) {
-        $hz = 'jpeg';
-    } else if (preg_match('/\.gif/i', $imgSrc)) {
-        $hz = 'gif';
-    } else {
-        $hz = 'png';
+    if (empty($data)) {
+        return false;
     }
     $pathDir = '/upload/' . date('Ymd');
     $dir = ROOT_DIR . '/public' . $pathDir;
@@ -176,10 +202,6 @@ function downloadImg(string $imgSrc): string|bool
         return false;
     }
     $filename = md5(time() . $imgSrc) . '.' . $hz;
-    $data = Query::getInstance()->setPcUserAgent()
-        ->setRandIp()
-        ->setUrl($imgSrc)
-        ->getOne();
     if (file_put_contents($dir . '/' . $filename, $data)) {
         return $pathDir . '/' . $filename;
     }
@@ -192,13 +214,11 @@ function downloadImg(string $imgSrc): string|bool
  */
 function getDomain(): string
 {
-    if (isset($_SERVER['SERVER_NAME'])) {
-        return $_SERVER['SERVER_NAME'];
+    $domain = getServerValue('SERVER_NAME');
+    if (empty($domain)) {
+        $domain = getServerValue('HTTP_HOST');
     }
-    if (isset($_SERVER['HTTP_HOST'])) {
-        return $_SERVER['HTTP_HOST'];
-    }
-    return 'localhost';
+    return $domain;
 }
 
 /**
@@ -1381,11 +1401,7 @@ function emoji(string $str): void
 function getPath(): string
 {
     if (!defined('URI_PATH')) {
-        $pathinfo = $_GET[config('app.query_str', 's')] ?? '';
-        unset($_GET[config('app.query_str', 's')], $_REQUEST[config('app.query_str', 's')]);
-        if (preg_match('/\.php/i', $pathinfo)) {
-            $pathinfo = str_ireplace(ltrim($_SERVER['PHP_SELF'], '/'), '', $pathinfo);
-        }
+        $pathinfo = urldecode(parse_url(getServerValue('REQUEST_URI'), PHP_URL_PATH));
         define('URI_PATH', trim($pathinfo, '/'));
     }
     return URI_PATH;
@@ -1397,7 +1413,7 @@ function getPath(): string
  */
 function getCacheKey(): string
 {
-    return md5(MODULE . ($_SERVER['QUERY_STRING'] ?? $_SERVER['REQUEST_URI']));
+    return md5(MODULE . getServerValue('REQUEST_URI'));
 }
 
 /**
@@ -1668,4 +1684,33 @@ function isImage(string $filePath): bool
         return getimagesize($filePath) !== false;
     }
     return false;
+}
+
+/**
+ * 递归删除文件夹内容
+ * @param string $dir 文件夹
+ * @param bool $deleteDir 是否删除文件夹
+ * @return bool
+ */
+function removeDir(string $dir, bool $deleteDir = false): bool
+{
+    if (!is_dir($dir)) {
+        return true;
+    }
+    $files = scandir($dir);
+    foreach ($files as $file) {
+        if ($file == '.' || $file == '..') {
+            continue;
+        }
+        $f = $dir . '/' . $file;
+        if (is_dir($f)) {
+            removeDir($f, $deleteDir);
+        } else {
+            unlink($f);
+        }
+    }
+    if ($deleteDir) {
+        return rmdir($dir);
+    }
+    return true;
 }

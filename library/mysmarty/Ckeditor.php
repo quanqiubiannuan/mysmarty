@@ -341,6 +341,8 @@ class Ckeditor
                                 $srcDir = downloadImg($v);
                                 if ($srcDir) {
                                     $pv = str_ireplace($v, $srcDir, $pv);
+                                } else {
+                                    $pv = str_ireplace($v, '', $pv);
                                 }
                             }
                         }

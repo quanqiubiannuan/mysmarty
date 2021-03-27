@@ -52,9 +52,8 @@ chmod -R 740 mysmarty/public/runtime
 ​	添加转发，将所有请求转发至`public/index.php`
 
 ```nginx
-if (!-e $request_filename) {
-	rewrite  ^/(.*)$  /index.php?s=$1  last;
-	break;
+location / {
+    try_files $uri $uri/ /index.php?$query_string;
 }
 ```
 
@@ -64,22 +63,37 @@ if (!-e $request_filename) {
 
 ```nginx
 server {
-	listen       8033;
-	server_name  localhost;
+    #端口
+	listen 80;
+    #域名
+	server_name localhost;
+    #代码位置
+	root /usr/share/nginx/html/mysmarty/public;
+    #首页默认文件
+	index index.html index.htm index.php;
+    #文件编码
+	charset utf-8;
+    #错误页面
+	error_page 500 502 503 504 /50x.html;
+    #所有请求转发至index.php
 	location / {
-    	root   /usr/share/nginx/html/mysmarty/public;
-    	index  index.html index.htm index.php;
-		if (!-e $request_filename) {
-			rewrite  ^/(.*)$  /index.php?s=$1  last;
-			break;
-		}
+		try_files $uri $uri/ /index.php?$query_string;
 	}
+    #配置favicon.ico请求
+	location = /favicon.ico {
+		access_log off;
+		log_not_found off;
+	}
+    #配置robots.txt请求
+	location = /robots.txt {
+		access_log off;
+		log_not_found off;
+	}
+    #处理PHP文件
 	location ~ \.php$ {
-    	root           /usr/share/nginx/html/mysmarty/public;
-    	fastcgi_pass   127.0.0.1:9000;
-    	fastcgi_index  index.php;
-    	fastcgi_param  SCRIPT_FILENAME /usr/share/nginx/html/mysmarty/public$fastcgi_script_name;
-    	include        fastcgi_params;
+		fastcgi_pass 127.0.0.1:9000;
+		fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+		include fastcgi_params;
 	}
 }
 ```
