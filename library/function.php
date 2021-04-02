@@ -9,6 +9,7 @@ use library\mysmarty\Emoji;
 use library\mysmarty\Query;
 use library\mysmarty\Route;
 use library\mysmarty\Session;
+use library\mysmarty\Tinymce;
 
 /**
  * 格式化字节单位
@@ -101,7 +102,7 @@ function isOptions(): bool
  */
 function isCgiMode(): bool
 {
-    return strpos(PHP_SAPI, 'cgi') === 0;
+    return str_starts_with(PHP_SAPI, 'cgi');
 }
 
 /**
@@ -144,11 +145,18 @@ function isWin(): bool
  * 文章内容排版
  * @param string $str
  * @param bool $downloadImg 自动下载内容中的图片
+ * @param int $editor 富文本编辑器，1 Ckeditor，2 Tinymce
  * @return string
  */
-function paiban(string $str, bool $downloadImg = true): string
+function paiban(string $str, bool $downloadImg = true, int $editor = 1): string
 {
-    return Ckeditor::getInstance()->getContent($str, $downloadImg);
+    switch ($editor) {
+        case 1:
+            return Ckeditor::getInstance()->getContent($str, $downloadImg);
+        case 2:
+            return Tinymce::getInstance()->getContent($str, $downloadImg);
+    }
+    return $str;
 }
 
 /**
@@ -158,7 +166,6 @@ function paiban(string $str, bool $downloadImg = true): string
  */
 function downloadImg(string $imgSrc): string|bool
 {
-    $data = '';
     if (0 === stripos($imgSrc, 'http')) {
         if (preg_match('/\.jpg/i', $imgSrc)) {
             $hz = 'jpg';
@@ -191,7 +198,7 @@ function downloadImg(string $imgSrc): string|bool
             return false;
         }
     } else {
-        return false;
+        return $imgSrc;
     }
     if (empty($data)) {
         return false;
@@ -245,9 +252,8 @@ function getDescriptionforArticle(string $content, int $len = 200): string
  */
 function myTrim(string $str): string
 {
+    $str = preg_replace('/^(&nbsp;|\s)+|(&nbsp;|\s)+$/iu', '', $str);
     $str = trim($str);
-    $str = preg_replace('/^[　\s]+/u', '', $str);
-    $str = preg_replace('/[　\s]+$/u', '', $str);
     return $str;
 }
 
@@ -415,9 +421,9 @@ function formatHtml(string $html): string
 {
     // 不替换pre内的内容
     $preData = [];
-    if (preg_match_all('/<pre>(.*)<\/pre>/Us', $html, $mat)) {
+    if (preg_match_all('/<pre[^>]*>(.*)<\/pre>/iUs', $html, $mat)) {
         foreach ($mat[1] as $k => $v) {
-            $key = '##@##' . $k . '##@##';
+            $key = 'pre_' . md5($k);
             $preData[$key] = $v;
             $html = str_ireplace($v, $key, $html);
         }
@@ -572,11 +578,11 @@ function tip(string $msg, string $url = '', int $code = 200): void
 /**
  * 获取POST\GET参数数据
  * @param string $name 字段
- * @param string $defValue 默认值
+ * @param mixed $defValue 默认值
  * @param bool $trim 是否去掉空格
- * @return string
+ * @return mixed
  */
-function input(string $name, string $defValue = '', bool $trim = true): string
+function input(string $name, mixed $defValue = '', bool $trim = true): mixed
 {
     if (isset($_POST[$name])) {
         $value = $_POST[$name];
@@ -585,7 +591,7 @@ function input(string $name, string $defValue = '', bool $trim = true): string
     } else {
         $value = $defValue;
     }
-    if ($trim) {
+    if ($trim && is_string($value)) {
         $value = trim($value);
     }
     return $value;
@@ -1003,7 +1009,7 @@ function getTempletConfig(string $configFile, string $name, string $section = ''
             // 多行，当前值就等于当前行内容
             $value = $str;
         }
-        if (strpos($value, '"""') === 0) {
+        if (str_starts_with($value, '"""')) {
             // 多行
             $mData = substr($value, 3) . PHP_EOL;
             $mFlag = true;
