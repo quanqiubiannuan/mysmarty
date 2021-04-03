@@ -252,7 +252,7 @@ function getDescriptionforArticle(string $content, int $len = 200): string
  */
 function myTrim(string $str): string
 {
-    $str = preg_replace('/^(&nbsp;|\s)+|(&nbsp;|\s)+$/iu', '', $str);
+    $str = preg_replace('/^(&nbsp;|\s|<br>)+|(&nbsp;|\s|<br>)+$/iu', '', $str);
     $str = trim($str);
     return $str;
 }
