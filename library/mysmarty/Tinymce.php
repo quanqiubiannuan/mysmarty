@@ -40,8 +40,7 @@ class Tinymce
     public function getContent(string $content, bool $downloadImg = true): string
     {
         $content = $this->dealTag(strip_tags($content, $this->allowTags), $downloadImg);
-        $content = $this->afterPaiban($content);
-        return $content;
+        return $this->afterPaiban($content);
     }
 
     /**
@@ -70,7 +69,7 @@ class Tinymce
      */
     private function dealTag(string $content, bool $downloadImg = true): string
     {
-        $content = preg_replace_callback('~<([a-z0-9]+)[^>]*>~ui', function ($mat) use ($downloadImg) {
+        return preg_replace_callback('~<([a-z0-9]+)[^>]*>~ui', function ($mat) use ($downloadImg) {
             switch (strtolower($mat[1])) {
                 case 'p':
                     return '<p>';
@@ -227,7 +226,6 @@ class Tinymce
             }
             return $mat[0];
         }, $content);
-        return $content;
     }
 
     /**

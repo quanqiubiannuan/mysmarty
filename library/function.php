@@ -166,6 +166,9 @@ function paiban(string $str, bool $downloadImg = true, int $editor = 1): string
  */
 function downloadImg(string $imgSrc): string|bool
 {
+    if (0 === stripos($imgSrc, '//')) {
+        $imgSrc = 'https:' . $imgSrc;
+    }
     if (0 === stripos($imgSrc, 'http')) {
         if (preg_match('/\.jpg/i', $imgSrc)) {
             $hz = 'jpg';
@@ -237,12 +240,12 @@ function getDomain(): string
 function getDescriptionforArticle(string $content, int $len = 200): string
 {
     $content = strip_tags(htmlspecialchars_decode($content));
-    $content = myTrim($content);
     $content = preg_replace('/([\n]|[\r\n])/', '', $content);
     $content = preg_replace('/[ 　]/u', '', $content);
     $content = mb_substr($content, 0, $len, 'utf-8');
+    $content = myTrim($content);
     $content = htmlspecialchars($content);
-    return $content;
+    return preg_replace('/&[\w]+;/Ui', '', $content);
 }
 
 /**
@@ -252,9 +255,8 @@ function getDescriptionforArticle(string $content, int $len = 200): string
  */
 function myTrim(string $str): string
 {
-    $str = preg_replace('/^(&nbsp;|\s|<br>)+|(&nbsp;|\s|<br>)+$/iu', '', $str);
-    $str = trim($str);
-    return $str;
+    $str = preg_replace('/^(&nbsp;|\s|<br>|[\x{200B}-\x{200D}])+|(&nbsp;|\s|<br>|[\x{200B}-\x{200D}])+$/iu', '', $str);
+    return trim($str);
 }
 
 /**

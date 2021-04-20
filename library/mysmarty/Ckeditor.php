@@ -46,8 +46,7 @@ class Ckeditor
     public function getContent(string $content, bool $downloadImg = true): string
     {
         $content = $this->stripTags($content);
-        $content = $this->paiban($content, $downloadImg);
-        return $content;
+        return $this->paiban($content, $downloadImg);
     }
 
     /**
