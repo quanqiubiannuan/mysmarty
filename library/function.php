@@ -241,10 +241,10 @@ function getDescriptionforArticle(string $content, int $len = 200): string
 {
     $content = strip_tags(htmlspecialchars_decode($content));
     $content = preg_replace('/([\n]|[\r\n])/', '', $content);
-    $content = preg_replace('/[ 　]/u', '', $content);
+    $content = preg_replace('/[\s]{2,}/u', '', $content);
     $content = mb_substr($content, 0, $len, 'utf-8');
     $content = myTrim($content);
-    $content = htmlspecialchars($content);
+    $content = htmlspecialchars($content, double_encode: false);
     return preg_replace('/&[\w]+;/Ui', '', $content);
 }
 
