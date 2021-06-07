@@ -715,18 +715,11 @@ function getIp(bool $getProxyIp = false): string
  */
 function isValidIp(string $ip, string $type = ''): bool
 {
-    switch (strtolower($type)) {
-        case 'ipv4':
-            $flag = FILTER_FLAG_IPV4;
-            break;
-        case 'ipv6':
-            $flag = FILTER_FLAG_IPV6;
-            break;
-        default:
-            $flag = null;
-            break;
-    }
-
+    $flag = match (strtolower($type)) {
+        'ipv4' => FILTER_FLAG_IPV4,
+        'ipv6' => FILTER_FLAG_IPV6,
+        default => null,
+    };
     return boolval(filter_var($ip, FILTER_VALIDATE_IP, $flag));
 }
 
