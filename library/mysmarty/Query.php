@@ -465,7 +465,7 @@ class Query
         if (is_array($body)) {
             $body = json_encode($body, JSON_UNESCAPED_UNICODE);
         }
-        return $this->setHeader(array_merge($this->header, ['Content-Type: text/json; charset=utf-8', 'Content-Length:' . strlen($body)]))
+        return $this->setHeader(array_merge($this->header, ['Content-Type: application/json', 'Content-Length:' . strlen($body)]))
             ->setPostFields($body)
             ->send();
     }
