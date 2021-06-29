@@ -3,7 +3,6 @@
 namespace library\mysmarty;
 
 use Exception;
-use JetBrains\PhpStorm\ArrayShape;
 use PDO;
 use PDOStatement;
 use RuntimeException;
@@ -847,7 +846,7 @@ class Model
         $this->connect();
         $result = $this->dbh->prepare($sql);
         $res = $result->execute($mWhereArgs);
-        $this->mSql = $sql . ' 绑定的参数：' . json_encode($mWhereArgs);
+        $this->mSql = $sql . ' 绑定的参数：' . json_encode($mWhereArgs, JSON_UNESCAPED_UNICODE);
         $this->mErrorCode = $result->errorCode();
         $this->mErrorInfo = $result->errorInfo();
         if (!$res) {
