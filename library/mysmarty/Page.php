@@ -2,8 +2,6 @@
 
 namespace library\mysmarty;
 
-use JetBrains\PhpStorm\ArrayShape;
-
 /**
  * 分页类
  * @package library\mysmarty
@@ -40,7 +38,6 @@ class Page
      * @param string $varPage 分页变量。默认为page
      * @return array
      */
-    #[ArrayShape(['curPage' => "int", 'count' => "int", 'totalPage' => "int", 'size' => "int", 'pageData' => "array"])]
     public function paginate(int $count, int $size = 10, int|bool $limitTotalPage = false, int|bool $limitPage = 5, string $varPage = 'page'): array
     {
         $curPage = getInt($varPage);

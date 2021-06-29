@@ -1593,7 +1593,6 @@ class Model
      * @param string $varPage
      * @return array
      */
-    #[ArrayShape(['curPage' => "int", 'count' => "int", 'totalPage' => "int", 'size' => "int", 'pageData' => "array", 'data' => "array"])]
     public function paginate(int $size = 10, bool|int $limitTotalPage = false, int|bool $limitPage = 5, string $varPage = 'page'): array
     {
         $whereData = $this->saveWhereData();
@@ -1611,7 +1610,6 @@ class Model
      * @param string $varPage
      * @return array
      */
-    #[ArrayShape(['curPage' => "int", 'count' => "int", 'totalPage' => "int", 'size' => "int", 'pageData' => "array", 'data' => "array"])]
     public function paginateByCount(int $count, int $size = 10, int|bool $limitTotalPage = false, int|bool $limitPage = 5, string $varPage = 'page'): array
     {
         $result = Page::getInstance()->paginate($count, $size, $limitTotalPage, $limitPage, $varPage);
