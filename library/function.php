@@ -394,8 +394,7 @@ function formatJs(string $js): string
     $js = preg_replace('/[\t]+/', ' ', $js);
     // 替换两个空格及以上空格 为一个
     $js = preg_replace('/[ ]{2,}/', ' ', $js);
-    $js = trim($js);
-    return $js;
+    return myTrim($js);
 }
 
 /**
@@ -1255,6 +1254,7 @@ function xmlToArray(string $xml): array
  * 将数组转为标准的xml结构
  * @param array $data
  * @return string|bool
+ * @throws Exception
  */
 function arrayToXml(array $data): string|bool
 {
