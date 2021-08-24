@@ -17,14 +17,6 @@ class BrowserDownload
     private string $downloadFileName;
     private static ?self $obj = null;
 
-    private function __construct()
-    {
-    }
-
-    private function __clone()
-    {
-    }
-
     /**
      * 获取实例
      * @return static
