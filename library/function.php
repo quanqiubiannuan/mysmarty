@@ -1436,26 +1436,6 @@ function isRequestJson(): bool
 }
 
 /**
- * 生成配置文件
- */
-function generateConfig(): void
-{
-    if (!file_exists(CONFIG_FILE)) {
-        // 重新生成
-        Config::initAllConfig();
-    } else {
-        $config = json_decode(file_get_contents(CONFIG_FILE), true);
-        if ($config['app']['debug']) {
-            // 重新生成
-            Config::initAllConfig();
-        } else {
-            // 不需要生成
-            define('CONFIG', $config);
-        }
-    }
-}
-
-/**
  * 生成路由文件
  */
 function generateRoute(): void

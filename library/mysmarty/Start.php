@@ -19,7 +19,7 @@ class Start
      */
     public static function initCommon(): void
     {
-        define('MYSMARTY_VERSION', '1.0.2');
+        define('MYSMARTY_VERSION', '1.0.3');
         define('APPLICATION_DIR', ROOT_DIR . '/application');
         define('EXTEND_DIR', ROOT_DIR . '/extend');
         define('PUBLIC_DIR', ROOT_DIR . '/public');
@@ -28,7 +28,6 @@ class Start
         define('RUNTIME_DIR', ROOT_DIR . '/runtime');
         define('LIBRARY_DIR', ROOT_DIR . '/library');
         define('CONFIG_DIR', ROOT_DIR . '/config');
-        define('CONFIG_FILE', RUNTIME_DIR . '/cache/' . MODULE . '/config.php');
         define('ROUTE_FILE', RUNTIME_DIR . '/cache/' . MODULE . '/route.php');
         // 自动加载
         spl_autoload_register(function ($class) {
@@ -37,8 +36,6 @@ class Start
         // 引入核心函数库
         require_once LIBRARY_DIR . '/function.php';
         require_once APPLICATION_DIR . '/common.php';
-        // 生成配置文件
-        generateConfig();
         if (!config('app.debug', false)) {
             error_reporting(0);
         } else {

@@ -2,11 +2,11 @@
 define('ROOT_DIR', dirname(__DIR__));
 require_once ROOT_DIR . '/library/mysmarty/Start.php';
 //定义默认模块
-define('MODULE', 'home');
+const MODULE = 'home';
 //定义默认控制器
-define('CONTROLLER', 'Index');
+const CONTROLLER = 'Index';
 //定义默认方法
-define('ACTION', 'home');
+const ACTION = 'home';
 
 use library\mysmarty\Start;
 
