@@ -8,36 +8,36 @@ return [
      */
     'mysql' => [
         // 主机ip
-        'host' => '127.0.0.1',
+        'host' => env('DB_HOST', '127.0.0.1'),
         // mysql 用户名
-        'user' => 'root',
+        'user' => env('DB_USERNAME', 'root'),
         // mysql 密码
-        'password' => '123456',
+        'password' => env('DB_PASSWORD', '123456'),
         // mysql 端口
-        'port' => 3306,
+        'port' => env('DB_PORT', 3306),
         // mysql 默认数据库
-        'database' => 'test',
+        'database' => env('DB_DATABASE', 'test'),
         // mysql 字符编码
-        'charset' => 'utf8mb4'
+        'charset' => env('DB_CHARSET', 'utf8mb4')
     ],
     'redis' => [
         // 主机ip
-        'host' => '127.0.0.1',
+        'host' => env('REDIS_HOST', '127.0.0.1'),
         // redis 端口
-        'port' => 6379,
+        'port' => env('REDIS_PORT', 6379),
         // redis 密码
-        'pass' => ''
+        'pass' => env('REDIS_PASS', '')
     ],
     'elasticsearch' => [
         // 协议
-        'protocol' => 'http',
+        'protocol' => env('ELASTICSEARCH_PROTOCOL', 'http'),
         // 主机ip
-        'ip' => '127.0.0.1',
+        'ip' => env('ELASTICSEARCH_IP', '127.0.0.1'),
         // 端口
-        'port' => 9200,
+        'port' => env('ELASTICSEARCH_PORT', 9200),
         // 默认 数据库，索引
-        'database' => 'test',
+        'database' => env('ELASTICSEARCH_DATABASE', 'test'),
         // 默认 表，文档
-        'table' => 'library'
+        'table' => env('ELASTICSEARCH_TABLE', 'library')
     ]
 ];

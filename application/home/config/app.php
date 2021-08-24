@@ -3,5 +3,5 @@ return [
     'rrrr' => [
         'fsfsf' => '222'
     ],
-    'debug' => [2222],
+    'xxxxxxxxxxx' => env('ddd')
 ];

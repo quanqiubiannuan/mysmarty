@@ -20,11 +20,7 @@ class Config
         $envKey = self::getEnvKey($name);
         $value = getenv($envKey, true);
         if (false === $value) {
-            self::initConfig($name);
-            $value = getenv($envKey, true);
-            if (false === $value) {
-                return $defValue;
-            }
+            return $defValue;
         }
         return unserialize($value);
     }
@@ -48,31 +44,20 @@ class Config
      */
     private static function getEnvKey(string $name): string
     {
-        $envKey = self::$prefix . $name;
+        $envKey = strtolower(self::$prefix . $name);
         return str_ireplace('.', '_', $envKey);
     }
 
     /**
      * 初始化配置文件
-     * @param string $name
      */
-    private static function initConfig(string $name)
+    public static function initConfig()
     {
-        $configData = [];
-        $configApplicationData = [];
-        $nameArr = explode('.', $name);
-        // 主配置目录中查找
-        if (file_exists(CONFIG_DIR . '/' . $nameArr[0] . '.php')) {
-            $configData = require_once CONFIG_DIR . '/' . $nameArr[0] . '.php';
-        }
-        // 网站模块文件夹查找
-        $applicationDir = APPLICATION_DIR . '/' . MODULE . '/config';
-        if (file_exists($applicationDir . '/' . $nameArr[0] . '.php')) {
-            $configApplicationData = require_once $applicationDir . '/' . $nameArr[0] . '.php';
-        }
+        $configData = self::getDirConfigData(CONFIG_DIR);
+        $configApplicationData = self::getDirConfigData(APPLICATION_DIR . '/' . MODULE . '/config');
         $data = array_replace_recursive($configData, $configApplicationData);
-        if (!empty($data)) {
-            self::saveConfig($data, $nameArr[0]);
+        foreach ($data as $k => $v) {
+            self::saveConfig($v, $k);
         }
     }
 
@@ -92,5 +77,25 @@ class Config
                 self::saveConfig($v, $prefix . '_' . $k);
             }
         }
+    }
+
+    /**
+     * 读取指定文件夹下的配置文件
+     * @param string $dir
+     * @return array
+     */
+    private static function getDirConfigData(string $dir): array
+    {
+        $data = [];
+        if (file_exists($dir)) {
+            //读取$dir目录下的配置
+            $files = scandir($dir);
+            foreach ($files as $file) {
+                if (str_ends_with($file, '.php')) {
+                    $data[str_ireplace('.php', '', $file)] = require_once $dir . '/' . $file;
+                }
+            }
+        }
+        return $data;
     }
 }

@@ -36,6 +36,10 @@ class Start
         // 引入核心函数库
         require_once LIBRARY_DIR . '/function.php';
         require_once APPLICATION_DIR . '/common.php';
+        // 初始化env
+        Env::initEnv();
+        // 初始化配置
+        Config::initConfig();
         if (!config('app.debug', false)) {
             error_reporting(0);
         } else {
