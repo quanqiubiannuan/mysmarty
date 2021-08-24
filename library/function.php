@@ -1570,7 +1570,7 @@ function generateRoute(): void
             foreach ($data as $k => $v) {
                 // 判断是否为首页
                 if ($homeClass === $v['class'] && ACTION === $v['methodName']) {
-                    $home = $data[$k];
+                    $home = $v;
                     unset($data[$k]);
                     break;
                 }
