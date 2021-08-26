@@ -13,6 +13,19 @@ class App
     // route文件配置
     private string $routeFile = RUNTIME_DIR . '/cache/' . MODULE . '/mysmarty_route.php';
 
+    /**
+     * 获取静态操作对象
+     * @return static
+     */
+    public static function getInstance(): static
+    {
+        if (is_null(static::$obj)) {
+            static::$obj = new static;
+            static::$obj->initData();
+        }
+        return static::$obj;
+    }
+
     private function initData()
     {
         $this->initEnv();
@@ -53,19 +66,6 @@ class App
     public function getEnv(string $name, mixed $defValue = ''): mixed
     {
         return $this->envData[$name] ?? $defValue;
-    }
-
-    /**
-     * 获取静态操作对象
-     * @return static
-     */
-    public static function getInstance(): static
-    {
-        if (is_null(static::$obj)) {
-            static::$obj = new static;
-            static::$obj->initData();
-        }
-        return static::$obj;
     }
 
     /**
