@@ -39,14 +39,8 @@ class Start
         // 初始化env
         Env::initEnv();
         // 初始化配置
-        $result = App::getInstance()->getEnv('Db_test');
-        var_dump($result);
-        $result = App::getInstance()->getEnv('Db_tesT');
-        var_dump($result);
-        $result = App::getInstance()->getEnv('Db_test2222');
-        var_dump($result);
-        $result = App::getInstance()->getEnv('Db_test333');
-        var_dump($result);
+        var_dump(getTempletConfig('templet.conf','pageTitle'));
+        var_dump(getTempletConfig('templet.conf','pageTitl222e','Customer'));
         exit();
         Config::initConfig();
         if (!config('app.debug', false)) {

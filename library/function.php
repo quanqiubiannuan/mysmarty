@@ -942,89 +942,23 @@ function toDivideName(string $name, string $splitStr = ''): string
  * @param string $configFile 模板配置文件名
  * @param string $name 字段名
  * @param string $section 字段所在节点（域）
- * @return boolean|string
+ * @param mixed $defValue 默认值
+ * @return string
  */
-function getTempletConfig(string $configFile, string $name, string $section = ''): string|bool
+function getTempletConfig(string $configFile, string $name, string $section = '', mixed $defValue = ''): string
 {
     // 判断模板配置文件是否存在
     $file = APPLICATION_DIR . '/' . MODULE . '/config/' . $configFile;
     if (!file_exists($file)) {
-        return false;
+        return $defValue;
     }
-    $handle = fopen($file, 'rb');
-    if (!$handle) {
-        return false;
+    if (empty($section)) {
+        $data = parse_ini_file($file);
+        return $data[$name] ?? $defValue;
+    } else {
+        $data = parse_ini_file($file, true);
+        return $data[$section][$name] ?? $defValue;
     }
-    // 当前模板所在节点
-    $isSection = '';
-    // 当前值
-    $mData = '';
-    // 多行查找标记
-    $mFlag = false;
-    // 一行一行的读取
-    while (($str = fgets($handle)) !== false) {
-        // 去掉当前行内容的空格
-        $str = trim($str);
-        if (empty($str)) {
-            continue;
-        }
-        // 截取当前行的第一个字符
-        switch ($str[0]) {
-            case '#':
-                // 注释
-                continue 2;
-            case '[':
-                // 节点
-                if (preg_match('/\[(.*)\]/U', $str, $mat)) {
-                    // 当前节点
-                    $isSection = trim($mat[1]);
-                    $isSection = trim($isSection, '.');
-                }
-                break;
-        }
-        // 查找的节点与当前节点不一样
-        if ($isSection !== $section) {
-            continue;
-        }
-        // 不是多行
-        if (!$mFlag) {
-            // 分隔当前行内容
-            $arr = explode('=', $str);
-            if (count($arr) !== 2) {
-                continue;
-            }
-            // 字段是否相等
-            $key = trim($arr[0]);
-            if ($key !== $name) {
-                continue;
-            }
-            // 当前值
-            $value = trim($arr[1]);
-        } else {
-            // 多行，当前值就等于当前行内容
-            $value = $str;
-        }
-        if (str_starts_with($value, '"""')) {
-            // 多行
-            $mData = substr($value, 3) . PHP_EOL;
-            $mFlag = true;
-        } else if (substr($value, -3) === '"""') {
-            // 多行结束
-            $mData .= substr($value, 0, -3);
-            $mFlag = false;
-            break;
-        } else {
-            if (!$mFlag) {
-                // 不是多行，直接返回当前值
-                $mData = $value;
-                break;
-            }
-            // 是多行，就拼接数据
-            $mData .= $value . PHP_EOL;
-        }
-    }
-    fclose($handle);
-    return trim($mData, PHP_EOL);
 }
 
 /**
