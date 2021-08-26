@@ -14,7 +14,7 @@ class App
     private string $routeFile = RUNTIME_DIR . '/cache/' . MODULE . '/mysmarty_route.php';
 
     /**
-     * 静止实例化
+     * 禁止实例化
      */
     private function __construct()
     {
