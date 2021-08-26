@@ -40,6 +40,9 @@ class App
         return static::$obj;
     }
 
+    /**
+     * 初始化数据
+     */
     private function initData()
     {
         $this->initEnv();
