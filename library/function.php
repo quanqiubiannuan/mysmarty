@@ -7,7 +7,6 @@ use library\mysmarty\Cookie;
 use library\mysmarty\ElasticSearch;
 use library\mysmarty\Emoji;
 use library\mysmarty\Query;
-use library\mysmarty\Route;
 use library\mysmarty\Session;
 use library\mysmarty\Tinymce;
 
@@ -1370,161 +1369,6 @@ function isRequestJson(): bool
 }
 
 /**
- * 生成路由文件
- */
-function generateRoute(): void
-{
-    if (!file_exists(ROUTE_FILE) || \config('app.debug')) {
-        // 重新生成
-        $controllerDir = APPLICATION_DIR . '/' . MODULE . '/controller';
-        $classData = getNamespaceClass($controllerDir);
-        $data = [];
-        $sortLevelData = [];
-        $sortLenData = [];
-        try {
-            foreach ($classData as $class) {
-                // 获取类上的路由设置
-                $obj = new ReflectionClass($class);
-                $attributes = $obj->getAttributes(Route::class);
-                $topRoute = '';
-                $topPattern = [];
-                $topMiddleware = [];
-                $topLevel = Route::MIDDLE;
-                $topCaching = true;
-                if (1 === count($attributes)) {
-                    // 定义了路由
-                    $topRouteObj = $attributes[0]->newInstance();
-                    $topRoute = $topRouteObj->getUrl();
-                    $topPattern = $topRouteObj->getPattern();
-                    $topMiddleware = $topRouteObj->getMiddleware();
-                    $topLevel = $topRouteObj->getLevel();
-                    $topCaching = $topRouteObj->isCaching();
-                }
-                if ($topCaching) {
-                    $defaultProperties = $obj->getDefaultProperties();
-                    if (!isset($defaultProperties['myCache']) || false === $defaultProperties['myCache']) {
-                        $topCaching = false;
-                    }
-                }
-                $controllerPath = str_ireplace('application\\' . MODULE . '\controller\\', '', $class);
-                // 获取方法上的路由设置
-                $methods = $obj->getMethods(ReflectionMethod::IS_PUBLIC);
-                foreach ($methods as $method) {
-                    $methodRoute = '';
-                    $methodPattern = [];
-                    $methodMiddleware = [];
-                    $methodLevel = $topLevel;
-                    // 方法参数列表
-                    $methodParams = [];
-                    $methodName = $method->getName();
-                    // 去掉构造方法
-                    if ('__construct' === $methodName) {
-                        continue;
-                    }
-                    $methodAttributes = $method->getAttributes(Route::class);
-                    $methodCaching = $topCaching;
-                    if (1 === count($methodAttributes)) {
-                        // 方法使用了路由
-                        $methodRouteObj = $methodAttributes[0]->newInstance();
-                        $methodRoute = $methodRouteObj->getUrl();
-                        $methodPattern = $methodRouteObj->getPattern();
-                        $methodMiddleware = $methodRouteObj->getMiddleware();
-                        $methodLevel = $methodRouteObj->getLevel();
-                        $methodCaching = $methodRouteObj->isCaching();
-                    }
-                    if (empty($methodRoute)) {
-                        // 转为普通访问方式
-                        $methodRoute = toDivideName($methodName);
-                    }
-                    if (!str_starts_with($methodRoute, '/')) {
-                        if (empty($topRoute)) {
-                            // 转为普通访问方式
-                            $tmp = str_ireplace('\\', '/', $controllerPath);
-                            $tmp = toDivideName($tmp, '/');
-                            $topRoute = MODULE . '/' . $tmp;
-                        }
-                        $methodRoute = trim($topRoute, '/') . '/' . $methodRoute;
-                    }
-                    $methodParameters = $method->getParameters();
-                    foreach ($methodParameters as $methodParameter) {
-                        $methodParams[] = $methodParameter->getName();
-                    }
-                    // 处理路由文件
-                    $methodPattern = array_merge($topPattern, $methodPattern);
-                    $methodMiddleware = array_merge($topMiddleware, $methodMiddleware);
-                    $uri = trim($methodRoute, '/');
-                    $uri = preg_quote($uri);
-                    // 替换正则表达式
-                    $reg = '/\\\{([a-z0-9_]+)\\\}/iU';
-                    $uri = preg_replace_callback($reg, function ($match) use ($methodPattern) {
-                        return '(?P<' . $match[1] . '>' . ($methodPattern[$match[1]] ?? '[a-z0-9_]+') . ')';
-                    }, $uri);
-                    // 处理中间件，方法名区分大小写
-                    $dealMethodMiddleware = [];
-                    foreach ($methodMiddleware as $midd => $middleware) {
-                        if (is_array($middleware)) {
-                            // 排除
-                            $middExcept = $middleware['except'] ?? [];
-                            if (!empty($middExcept) && !in_array($methodName, $middExcept)) {
-                                $dealMethodMiddleware[] = $midd;
-                            }
-                            // 仅包括
-                            $middOnly = $middleware['only'] ?? [];
-                            if (!empty($middOnly) && in_array($methodName, $middOnly)) {
-                                $dealMethodMiddleware[] = $midd;
-                            }
-                        } else if (is_string($middleware)) {
-                            $dealMethodMiddleware[] = $middleware;
-                        }
-                    }
-                    $dealMethodMiddleware = array_unique($dealMethodMiddleware);
-                    // 排序
-                    $sortLevelData[] = $methodLevel;
-                    $sortLenData[] = mb_strlen($uri, 'utf-8');
-                    // 处理缓存
-                    if (false === $topCaching && true === $methodCaching) {
-                        $methodCaching = false;
-                    }
-                    $data[] = [
-                        'class' => $class,
-                        'methodName' => $methodName,
-                        'methodParams' => $methodParams,
-                        'methodLevel' => $methodLevel,
-                        'uri' => $uri,
-                        'methodMiddleware' => $dealMethodMiddleware,
-                        'methodPattern' => $methodPattern,
-                        'controller' => $controllerPath,
-                        'caching' => $methodCaching
-                    ];
-                }
-            }
-            array_multisort($sortLevelData, SORT_DESC, $sortLenData, SORT_DESC, $data);
-            $home = [];
-            $homeClass = 'application\\' . MODULE . '\controller\\' . CONTROLLER;
-            foreach ($data as $k => $v) {
-                // 判断是否为首页
-                if ($homeClass === $v['class'] && ACTION === $v['methodName']) {
-                    $home = $v;
-                    unset($data[$k]);
-                    break;
-                }
-            }
-            if (empty($home)) {
-                error('未定义主页路由');
-            }
-            $data['home'] = $home;
-        } catch (ReflectionException $e) {
-            error('路由文件生成失败');
-        }
-        file_put_contents(ROUTE_FILE, json_encode($data));
-        define('ROUTE', $data);
-    } else {
-        // 不需要生成
-        define('ROUTE', json_decode(file_get_contents(ROUTE_FILE), true));
-    }
-}
-
-/**
  * 获取指定文件夹内class的命名空间地址
  * @param string $dir
  * @return array
@@ -1547,32 +1391,6 @@ function getNamespaceClass(string $dir): array
         }
     }
     return $classData;
-}
-
-/**
- * 获取指定文件夹内控制器文件是否有修改
- * @param string $dir
- * @return bool
- */
-function checkeFileUpdate(string $dir): bool
-{
-    $checkFileTime = filemtime(ROUTE_FILE);
-    if (file_exists($dir)) {
-        //读取$dir目录下的配置
-        $files = scandir($dir);
-        foreach ($files as $file) {
-            if ($file !== '.' && $file !== '..') {
-                if (str_ends_with($file, '.php')) {
-                    if (filemtime($dir . '/' . $file) > $checkFileTime) {
-                        return true;
-                    }
-                } else {
-                    return checkeFileUpdate($dir . '/' . $file);
-                }
-            }
-        }
-    }
-    return false;
 }
 
 /**

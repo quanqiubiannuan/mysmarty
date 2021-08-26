@@ -28,7 +28,6 @@ class Start
         define('RUNTIME_DIR', ROOT_DIR . '/runtime');
         define('LIBRARY_DIR', ROOT_DIR . '/library');
         define('CONFIG_DIR', ROOT_DIR . '/config');
-        define('ROUTE_FILE', RUNTIME_DIR . '/cache/' . MODULE . '/route.php');
         // 自动加载
         spl_autoload_register(function ($class) {
             require_once ROOT_DIR . '/' . str_ireplace('\\', '/', $class) . '.php';
@@ -62,8 +61,6 @@ class Start
         if (config('session.status') === 1) {
             startSession();
         }
-        // 生成路由
-        generateRoute();
     }
 
     /**
@@ -74,8 +71,9 @@ class Start
         self::initCommon();
         $uri = getPath();
         $mat = [];
+        $route = App::getInstance()->getAllRoute();
         if (!empty($uri)) {
-            foreach (ROUTE as $v) {
+            foreach ($route as $v) {
                 // 匹配当前规则，获取()内的内容
                 if ($uri === $v['uri'] || preg_match('#^' . $v['uri'] . '$#iU', $uri, $mat)) {
                     self::runRoute($v, $mat);
@@ -83,7 +81,7 @@ class Start
                 }
             }
         } else {
-            self::runRoute(ROUTE['home'], $mat);
+            self::runRoute($route['home'], $mat);
         }
         error('页面找不到');
     }
