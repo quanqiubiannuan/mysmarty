@@ -12,7 +12,7 @@ class App
     // route文件配置
     private string $routeFile = RUNTIME_DIR . '/cache/' . MODULE . '/mysmarty_route.php';
     // 是否为调试，调试模式重新生成各类配置文件
-    private bool $debug = false;
+    private bool $debug;
 
     public function __construct()
     {
