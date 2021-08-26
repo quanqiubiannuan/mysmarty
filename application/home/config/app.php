@@ -4,5 +4,6 @@ return [
         'fsfsf' => '222'
     ],
     'xxxxxxxxxxx' => env('ddd'),
-    'app_url' => 'xxxxxxxxxxxxxxxxxxxx'
+    'app_url' => 'xxxxxxxxxxxxxxxxxxxx',
+    'debug' => true
 ];

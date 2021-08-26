@@ -18,7 +18,6 @@ class App
     {
         // 初始化配置文件
         if ($this->isFileUpdate(CONFIG_DIR . '/app.php') || $this->isFileUpdate(APPLICATION_DIR . '/' . MODULE . '/config/app.php') || $this->isFileUpdate($this->envFile)) {
-            var_dump('xxxxxxxxxxxxxxxxxxxx');
             $this->debug = true;
         } else {
             $this->configData = unserialize(file_get_contents($this->configFile));
@@ -59,7 +58,6 @@ class App
      */
     private function initConfig()
     {
-        var_dump('-------初始化-----');
         $configData = $this->getDirConfigData(CONFIG_DIR);
         $configApplicationData = $this->getDirConfigData(APPLICATION_DIR . '/' . MODULE . '/config');
         $data = array_replace_recursive($configData, $configApplicationData);
