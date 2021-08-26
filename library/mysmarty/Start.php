@@ -36,13 +36,7 @@ class Start
         // 引入核心函数库
         require_once LIBRARY_DIR . '/function.php';
         require_once APPLICATION_DIR . '/common.php';
-        // 初始化env
-        Env::initEnv();
         // 初始化配置
-        var_dump(getTempletConfig('templet.conf','pageTitle'));
-        var_dump(getTempletConfig('templet.conf','pageTitl222e','Customer'));
-        exit();
-        Config::initConfig();
         if (!config('app.debug', false)) {
             error_reporting(0);
         } else {

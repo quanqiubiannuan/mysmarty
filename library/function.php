@@ -1,12 +1,11 @@
 <?php
 
+use library\mysmarty\App;
 use library\mysmarty\Cache;
 use library\mysmarty\Ckeditor;
-use library\mysmarty\Config;
 use library\mysmarty\Cookie;
 use library\mysmarty\ElasticSearch;
 use library\mysmarty\Emoji;
-use library\mysmarty\Env;
 use library\mysmarty\Query;
 use library\mysmarty\Route;
 use library\mysmarty\Session;
@@ -491,7 +490,7 @@ function getPlatformName(): string
  */
 function config(string $name, mixed $defValue = ''): mixed
 {
-    return Config::getConfig($name, $defValue);
+    return App::getInstance()->getConfig($name, $defValue);
 }
 
 /**
@@ -1633,11 +1632,11 @@ function removeDir(string $dir, bool $deleteDir = false): bool
 
 /**
  * 获取.env配置的值
- * @param string $key 配置key
+ * @param string $name 配置key
  * @param mixed $defValue 默认值
  * @return mixed
  */
-function env(string $key, mixed $defValue = ''): mixed
+function env(string $name, mixed $defValue = ''): mixed
 {
-    return Env::get($key, $defValue);
+    return App::getInstance()->getEnv($name, $defValue);
 }

@@ -12,20 +12,22 @@ class App
     private array $envData = [];
     // route文件配置
     private string $routeFile = RUNTIME_DIR . '/cache/' . MODULE . '/mysmarty_route.php';
-    // 是否为调试，调试模式重新生成各类配置文件
-    private bool $debug;
 
-    public function __construct()
+    private function initData()
     {
         $this->initEnv();
         // 初始化配置文件
         if ($this->isFileUpdate(CONFIG_DIR . '/app.php') || $this->isFileUpdate(APPLICATION_DIR . '/' . MODULE . '/config/app.php') || $this->isFileUpdate($this->envFile)) {
-            $this->debug = true;
+            $debug = true;
         } else {
             $this->configData = unserialize(file_get_contents($this->configFile));
-            $this->debug = $this->getConfig('app.debug', true);
+            if (empty($this->configData)) {
+                $debug = true;
+            } else {
+                $debug = $this->getConfig('app.debug', true);
+            }
         }
-        if ($this->debug && !$this->initConfig()) {
+        if ($debug && !$this->initConfig()) {
             exit('配置文件初始化失败');
         }
     }
@@ -59,27 +61,36 @@ class App
      */
     public static function getInstance(): static
     {
-        if (is_null(self::$obj)) {
-            self::$obj = new self();
+        if (is_null(static::$obj)) {
+            static::$obj = new static;
+            static::$obj->initData();
         }
-        return self::$obj;
+        return static::$obj;
     }
 
     /**
      * 初始化所有数组配置
      * @return bool
      */
-    private function initConfig()
+    private function initConfig(): bool
     {
-        $configData = $this->getDirConfigData(CONFIG_DIR);
-        $configApplicationData = $this->getDirConfigData(APPLICATION_DIR . '/' . MODULE . '/config');
-        $data = array_replace_recursive($configData, $configApplicationData);
-        $result = [];
-        foreach ($data as $k => $v) {
-            $result = array_merge($result, $this->formatConfig($v, $k));
+        if (empty($this->configData)) {
+            $configData = $this->getDirConfigData(CONFIG_DIR);
+            $configApplicationData = $this->getDirConfigData(APPLICATION_DIR . '/' . MODULE . '/config');
+            $data = array_replace_recursive($configData, $configApplicationData);
+            $result = [];
+            foreach ($data as $k => $v) {
+                if (!is_array($v)) {
+                    continue;
+                }
+                $result = array_merge($result, $this->formatConfig($v, $k));
+            }
+            $this->configData = $result;
+            if (!empty($result) && createDirByFile($this->configFile)) {
+                return file_put_contents($this->configFile, serialize($result)) !== false;
+            }
         }
-        $this->configData = $result;
-        return file_put_contents($this->configFile, serialize($result)) !== false;
+        return true;
     }
 
     /*
@@ -87,7 +98,7 @@ class App
      */
     private function initEnv()
     {
-        if (file_exists(ROOT_DIR . '/.env')) {
+        if (file_exists(ROOT_DIR . '/.env') && empty($this->envData)) {
             $data = parse_ini_file(ROOT_DIR . '/.env', false, INI_SCANNER_RAW);
             if (!empty($data)) {
                 foreach ($data as $k => $v) {
