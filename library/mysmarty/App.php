@@ -354,8 +354,12 @@ class App
             error('路由文件生成失败');
         }
         $this->routeData = $data;
-        if (!file_put_contents($this->routeFile, serialize($data))) {
-            error('路由文件保存失败');
+        if (createDirByFile($this->routeFile)) {
+            if (!file_put_contents($this->routeFile, serialize($data))) {
+                error('路由文件保存失败');
+            }
+        } else {
+            error('无法创建路由文件夹');
         }
     }
 
