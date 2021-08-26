@@ -5,7 +5,7 @@
 
 return [
     // 调试，false 关闭，true 开启
-    'debug' => env('APP_DEBUG', true),
+    'debug' => env('APP_DEBUG', false),
     // 应用初始化执行方法
     'app_init' => env('APP_INIT', ''),
     // 加密 key，定义之后不要修改，否则会导致之前加密的数据无法解密

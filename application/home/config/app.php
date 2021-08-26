@@ -3,5 +3,6 @@ return [
     'rrrr' => [
         'fsfsf' => '222'
     ],
-    'xxxxxxxxxxx' => env('ddd')
+    'xxxxxxxxxxx' => env('ddd'),
+    'app_url' => 'xxxxxxxxxxxxxxxxxxxx'
 ];

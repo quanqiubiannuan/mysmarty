@@ -39,6 +39,15 @@ class Start
         // 初始化env
         Env::initEnv();
         // 初始化配置
+        $result = App::getInstance()->getConfig('app');
+        var_dump($result);
+        $result = App::getInstance()->getConfig('app.debug');
+        var_dump($result);
+        $result = App::getInstance()->getConfig('database');
+        var_dump($result);
+        $result = App::getInstance()->getConfig('data3333base');
+        var_dump($result);
+        exit();
         Config::initConfig();
         if (!config('app.debug', false)) {
             error_reporting(0);
