@@ -39,13 +39,13 @@ class Start
         // 初始化env
         Env::initEnv();
         // 初始化配置
-        $result = App::getInstance()->getConfig('app');
+        $result = App::getInstance()->getEnv('Db_test');
         var_dump($result);
-        $result = App::getInstance()->getConfig('app.debug');
+        $result = App::getInstance()->getEnv('Db_tesT');
         var_dump($result);
-        $result = App::getInstance()->getConfig('database');
+        $result = App::getInstance()->getEnv('Db_test2222');
         var_dump($result);
-        $result = App::getInstance()->getConfig('data3333base');
+        $result = App::getInstance()->getEnv('Db_test333');
         var_dump($result);
         exit();
         Config::initConfig();

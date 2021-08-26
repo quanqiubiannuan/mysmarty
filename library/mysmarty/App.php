@@ -9,6 +9,7 @@ class App
     private array $configData = [];
     // env文件配置
     private string $envFile = ROOT_DIR . '/.env';
+    private array $envData = [];
     // route文件配置
     private string $routeFile = RUNTIME_DIR . '/cache/' . MODULE . '/mysmarty_route.php';
     // 是否为调试，调试模式重新生成各类配置文件
@@ -16,6 +17,7 @@ class App
 
     public function __construct()
     {
+        $this->initEnv();
         // 初始化配置文件
         if ($this->isFileUpdate(CONFIG_DIR . '/app.php') || $this->isFileUpdate(APPLICATION_DIR . '/' . MODULE . '/config/app.php') || $this->isFileUpdate($this->envFile)) {
             $this->debug = true;
@@ -38,6 +40,17 @@ class App
     {
         $name = str_ireplace('.', '_', $name);
         return $this->configData[$name] ?? $defValue;
+    }
+
+    /**
+     * 获取env配置的值
+     * @param string $name 配置名称
+     * @param mixed|string $defValue 默认值
+     * @return mixed
+     */
+    public function getEnv(string $name, mixed $defValue = ''): mixed
+    {
+        return $this->envData[$name] ?? $defValue;
     }
 
     /**
@@ -67,6 +80,28 @@ class App
         }
         $this->configData = $result;
         return file_put_contents($this->configFile, serialize($result)) !== false;
+    }
+
+    /*
+     * 初始化env数据
+     */
+    private function initEnv()
+    {
+        if (file_exists(ROOT_DIR . '/.env')) {
+            $data = parse_ini_file(ROOT_DIR . '/.env', false, INI_SCANNER_RAW);
+            if (!empty($data)) {
+                foreach ($data as $k => $v) {
+                    $data[$k] = match (strtolower($v)) {
+                        'true', '(true)' => true,
+                        'false', '(false)' => false,
+                        'empty', '(empty)' => '',
+                        'null', '(null)' => null,
+                        default => $v
+                    };
+                }
+                $this->envData = $data;
+            }
+        }
     }
 
     /**
