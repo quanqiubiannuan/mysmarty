@@ -9,6 +9,7 @@ use ReflectionMethod;
 class App
 {
     private static ?self $obj = null;
+    // 配置文件
     private string $configFile = RUNTIME_DIR . '/cache/' . MODULE . '/mysmarty_config.php';
     private array $configData = [];
     // env文件配置
@@ -17,6 +18,9 @@ class App
     // route文件配置
     private string $routeFile = RUNTIME_DIR . '/cache/' . MODULE . '/mysmarty_route.php';
     private array $routeData = [];
+    // 多语言文件
+    private string $langFile = RUNTIME_DIR . '/cache/' . MODULE . '/mysmarty_lang.php';
+    private array $langData = [];
 
     /**
      * 禁止实例化
@@ -67,11 +71,20 @@ class App
                 exit('配置文件初始化失败');
             }
             $this->initRoute();
+            $this->initLang();
         } else {
+            $lang = config('app.default_lang');
             if (file_exists($this->routeFile)) {
                 $this->routeData = unserialize(file_get_contents($this->routeFile));
             } else {
                 $this->initRoute();
+            }
+            if (!empty($lang)) {
+                if (file_exists($this->langFile)) {
+                    $this->langData = unserialize(file_get_contents($this->langFile));
+                } else {
+                    $this->initLang();
+                }
             }
         }
     }
@@ -79,7 +92,7 @@ class App
     /**
      * 获取配置的值
      * @param string $name 配置名称
-     * @param mixed|string $defValue 默认值
+     * @param mixed $defValue 默认值
      * @return mixed
      */
     public function getConfig(string $name, mixed $defValue = ''): mixed
@@ -91,7 +104,7 @@ class App
     /**
      * 获取env配置的值
      * @param string $name 配置名称
-     * @param mixed|string $defValue 默认值
+     * @param mixed $defValue 默认值
      * @return mixed
      */
     public function getEnv(string $name, mixed $defValue = ''): mixed
@@ -103,7 +116,7 @@ class App
      * 初始化所有数组配置
      * @return bool
      */
-    private function initConfig(): bool
+    public function initConfig(): bool
     {
         if (empty($this->configData)) {
             $configData = $this->getDirConfigData(CONFIG_DIR);
@@ -211,7 +224,7 @@ class App
     /**
      * 初始化路由
      */
-    private function initRoute()
+    public function initRoute()
     {
         $controllerDir = APPLICATION_DIR . '/' . MODULE . '/controller';
         $classData = getNamespaceClass($controllerDir);
@@ -370,5 +383,125 @@ class App
     public function getAllRoute(): array
     {
         return $this->routeData;
+    }
+
+    /**
+     * 获取当前语言
+     * @return string
+     */
+    private function getCurrentLang(): string
+    {
+        $defLang = config('app.default_lang');
+        if (!empty($defLang)) {
+            $detectLangVar = config('app.detect_lang_var');
+            if (!empty($detectLangVar)) {
+                $lang = getString($detectLangVar);
+                if (!empty($lang)) {
+                    return $lang;
+                }
+            }
+            $cookieLangVar = config('app.cookie_lang_var');
+            if (!empty($cookieLangVar)) {
+                $lang = getLocalCookie($cookieLangVar);
+                if (!empty($lang)) {
+                    return $lang;
+                }
+            }
+        }
+        return $defLang;
+    }
+
+    /**
+     * 初始化多语言
+     * @return bool
+     */
+    public function initLang(): bool
+    {
+        $lanDir = APPLICATION_DIR . '/' . MODULE . '/lang';
+        $langData = $this->getDirLangData($lanDir);
+        $result = [];
+        foreach ($langData as $k => $v) {
+            if (!is_array($v)) {
+                continue;
+            }
+            $result = array_merge($result, $this->formatLang($v, $k));
+        }
+        $this->langData = $result;
+        if (!empty($result) && createDirByFile($this->langFile)) {
+            return file_put_contents($this->langFile, serialize($result)) !== false;
+        }
+        return true;
+    }
+
+    /**
+     * 读取指定文件夹下的多语言文件
+     * @param string $dir
+     * @return array
+     */
+    private function getDirLangData(string $dir): array
+    {
+        $prefix = str_ireplace(APPLICATION_DIR . '/' . MODULE . '/lang', '', $dir);
+        if (!empty($prefix)) {
+            $prefix = trim($prefix, '/');
+            $prefix = str_ireplace('/', '_', $prefix);
+            $prefix .= '_';
+        }
+        static $data = [];
+        if (file_exists($dir)) {
+            //读取$dir目录下的配置
+            $files = scandir($dir);
+            foreach ($files as $file) {
+                if ($file === '.' || $file === '..') {
+                    continue;
+                }
+                $curFile = $dir . '/' . $file;
+                if (is_dir($curFile)) {
+                    $this->getDirLangData($curFile);
+                } else {
+                    if (str_ends_with($file, '.php')) {
+                        $data[$prefix . str_ireplace('.php', '', $file)] = require_once $curFile;
+                    }
+                }
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * 获取当前语言的值
+     * @param string $name 语言名称
+     * @return string
+     */
+    public function getLang(string $name): string
+    {
+        $lang = $this->getCurrentLang();
+        if (empty($lang)) {
+            return $name;
+        }
+        $key1 = $lang . '_' . toDivideName(str_ireplace('\\', '/', Start::$controller), '/');
+        $key1 = str_ireplace('/', '_', $key1) . '_' . $name;
+        $key2 = $lang . '_' . $name;
+        return $this->langData[$key1] ?? $this->langData[$key2] ?? $name;
+    }
+
+    /**
+     * 格式化一个语言配置
+     * @param array $data
+     * @param string $prefix 前缀
+     * @return array
+     */
+    private function formatLang(array $data, string $prefix = ''): array
+    {
+        static $result = [];
+        if (!empty($prefix)) {
+            $result[$prefix] = $data;
+        }
+        foreach ($data as $k => $v) {
+            $result[$prefix . '_' . $k] = $v;
+            if (is_array($v)) {
+                $this->formatLang($v, $prefix . '_' . $k);
+            }
+        }
+        return $result;
     }
 }

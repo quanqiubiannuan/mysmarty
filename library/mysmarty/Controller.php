@@ -61,7 +61,7 @@ class Controller
             $template = $this->getMyTemplate();
         } else {
             if (!preg_match('#/#', $template)) {
-                $tmp = toDivideName(str_ireplace('\\', '/', Start::$controller)) . '/' . $template;
+                $tmp = toDivideName(str_ireplace('\\', '/', Start::$controller), '/') . '/' . $template;
                 if (file_exists(APPLICATION_DIR . '/' . formatModule(Start::$module) . '/view/' . $tmp)) {
                     $template = $tmp;
                 }

@@ -1458,3 +1458,13 @@ function env(string $name, mixed $defValue = ''): mixed
 {
     return App::getInstance()->getEnv($name, $defValue);
 }
+
+/**
+ * 获取当前语言的值
+ * @param string $name 语言名称
+ * @return string
+ */
+function lang(string $name): string
+{
+    return App::getInstance()->getLang($name);
+}

@@ -13,5 +13,11 @@ return [
     // 默认时区
     'default_timezone' => env('DEFAULT_TIMEZONE', 'Asia/Shanghai'),
     // 应用默认url，不要以http开头或以 / 结尾，如：127.0.0.1
-    'app_url' => env('APP_URL', '')
+    'app_url' => env('APP_URL', ''),
+    // 为空不开启多语言，为其它值则开启多语言，例如：zh-cn
+    'default_lang' => env('DEFAULT_LANG'),
+    // 多语言自动检测的变量GET参数
+    'detect_lang_var' => env('DETECT_LANG_VAR', 'lang'),
+    // 多语言自动检测的变量COOKIE参数
+    'cookie_lang_var' => env('COOKIE_LANG_VAR', 'lang')
 ];
