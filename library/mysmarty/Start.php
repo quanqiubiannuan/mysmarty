@@ -83,7 +83,7 @@ class Start
         } else {
             self::runRoute($route['home'], $mat);
         }
-        error('页面找不到');
+        error(lang('页面找不到'));
     }
 
     /**

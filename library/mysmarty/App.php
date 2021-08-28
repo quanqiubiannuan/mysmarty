@@ -68,7 +68,7 @@ class App
         }
         if ($debug) {
             if (!$this->initConfig()) {
-                exit('配置文件初始化失败');
+                exit(lang('配置文件初始化失败'));
             }
             $this->initRoute();
             $this->initLang();
@@ -360,19 +360,19 @@ class App
                 }
             }
             if (empty($home)) {
-                error('未定义主页路由');
+                error(lang('未定义主页路由'));
             }
             $data['home'] = $home;
         } catch (ReflectionException $e) {
-            error('路由文件生成失败');
+            error(lang('路由文件生成失败'));
         }
         $this->routeData = $data;
         if (createDirByFile($this->routeFile)) {
             if (!file_put_contents($this->routeFile, serialize($data))) {
-                error('路由文件保存失败');
+                error(lang('路由文件保存失败'));
             }
         } else {
-            error('无法创建路由文件夹');
+            error(lang('无法创建路由文件夹'));
         }
     }
 
