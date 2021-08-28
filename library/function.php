@@ -1239,6 +1239,19 @@ function isZh(string $str): bool
 }
 
 /**
+ * 判断字符串是否包含中文字符
+ * @param string $str
+ * @return bool
+ */
+function hasZh(string $str): bool
+{
+    if (preg_match('/[\x{4e00}-\x{9fa5}]/u', $str)) {
+        return true;
+    }
+    return false;
+}
+
+/**
  * 获取框架版本号
  * @return string
  */

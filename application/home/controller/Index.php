@@ -8,6 +8,5 @@ class Index extends Controller
 {
     public function home()
     {
-        json(['name' => '22222222222222']);
     }
 }

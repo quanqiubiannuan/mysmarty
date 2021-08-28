@@ -91,7 +91,6 @@ class BrowserDownload extends Container
         header('Content-Transfer-Encoding: binary');
         header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $this->expire) . ' GMT');
         echo $this->data;
-        $this->_flush();
         exit();
     }
 }

@@ -7,7 +7,7 @@ use GdImage;
 /**
  * 验证码类
  */
-class Captcha
+class Captcha extends Container
 {
 
     /**
@@ -20,7 +20,7 @@ class Captcha
      * 图像上显示的字符
      * @var string
      */
-    private string $code;
+    private string $code = '';
 
     /**
      * 验证码类型
@@ -28,7 +28,10 @@ class Captcha
      */
     private int $codeStyle = 0;
 
-    //验证码长度
+    /**
+     * 验证码长度
+     * @var int
+     */
     private int $codeSize = 4;
 
     /**
@@ -50,31 +53,7 @@ class Captcha
     private static string $sessionName = 'code';
 
     /**
-     * 构造方法
-     * @param string $code 图像字符串
-     * @param int $height 图像高度
-     */
-    private function __construct(string $code = '', int $height = 0)
-    {
-        if (empty($code)) {
-            $this->code = $this->getCode();
-        }
-        if (0 !== $height) {
-            $this->height = $height;
-        }
-    }
-
-    /**
-     * 获取单一实例
-     * @return static
-     */
-    public static function getInstance(): static
-    {
-        return new self();
-    }
-
-    /**
-     * 设置字体我呢见
+     * 设置字体文件
      * @param string $fontFile 字体文件名称
      * @return static
      */
@@ -150,18 +129,14 @@ class Captcha
         return $this;
     }
 
-    private function __clone()
-    {
-    }
-
     /**
      * 静态调用方法
      * @param int $height 图像高度
-     * @return $this
+     * @return static
      */
     public static function code(int $height = 50): static
     {
-        return new self('', $height);
+        return self::getInstance()->setHeight($height);
     }
 
     /**
@@ -247,9 +222,9 @@ class Captcha
 
     /**
      * 生成验证码
-     * @return GdImage
+     * @return false|GdImage
      */
-    private function generateImage(): GdImage
+    private function generateImage(): GdImage|bool
     {
         $kWidth = 20;
         if (empty($this->code)) {
@@ -272,6 +247,10 @@ class Captcha
             }
         }
         Session::getInstance()->set(self::$sessionName, strtolower($this->code));
+        // 判断验证码
+        if (hasZh($this->code)) {
+            $this->fontFile = 'zkklt.ttf';
+        }
         // 创建画布
         $codeArr = preg_split('//u', $this->code);
         $codeLen = count($codeArr);
@@ -283,13 +262,13 @@ class Captcha
         // 计算坐标
         $imgInfo = imagettfbbox($this->font, 0, ROOT_DIR . '/extend/fonts/' . $this->fontFile, $this->code);
         //开始y位置
-        $y = ($this->height - $imgInfo[3] - $imgInfo[5]) / 2;
+        $y = (int)(($this->height - $imgInfo[3] - $imgInfo[5]) / 2);
         // 写字符串
         for ($i = 0; $i < $codeLen; $i++) {
             $angle = mt_rand(-20, 20);
             $text_color = imagecolorallocate($im, mt_rand(0, 100), mt_rand(0, 100), mt_rand(0, 100));
             // 画验证码
-            $x = $i * $kWidth;
+            $x = (int)($i * $kWidth);
             imagefttext($im, $this->font, $angle, $x, $y, $text_color, ROOT_DIR . '/extend/fonts/' . $this->fontFile, $codeArr[$i]);
             $text_color = imagecolorallocate($im, mt_rand(150, 255), mt_rand(150, 255), mt_rand(150, 255));
             imagestring($im, 5, $x, $y + mt_rand(-1 * $y, 5), $this->getOneCode(), $text_color);
