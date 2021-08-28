@@ -10,12 +10,13 @@ class Cache
     /**
      * 添加缓存
      * @param string $name 键
-     * @param string $value 值
+     * @param mixed $value 值
      * @param int $expire 缓存时间，单位秒
      * @return bool
      */
-    public static function set(string $name, string $value, int $expire = 3600): bool
+    public static function set(string $name, mixed $value, int $expire = 3600): bool
     {
+        $value = serialize($value);
         $cachingType = config('mysmarty.caching_type');
         switch ($cachingType) {
             case 'redis':
@@ -31,10 +32,10 @@ class Cache
     /**
      * 获取缓存
      * @param string $name 键
-     * @param string $defValue 默认值
+     * @param mixed $defValue 默认值
      * @return string
      */
-    public static function get(string $name, string $defValue = ''): string
+    public static function get(string $name, mixed $defValue = ''): string
     {
         $cachingType = config('mysmarty.caching_type');
         switch ($cachingType) {
@@ -42,7 +43,7 @@ class Cache
                 Redis::getInstance()->select(config('mysmarty.caching_type_params.redis.db', 0));
                 $value = Redis::getInstance()->get($name);
                 if (!empty($value)) {
-                    return $value;
+                    return unserialize($value);
                 }
                 return $defValue;
             default:
@@ -53,7 +54,7 @@ class Cache
                 $data = file_get_contents($file);
                 $expireTime = substr($data, 0, strpos($data, '|'));
                 if ($expireTime > time()) {
-                    return substr($data, strpos($data, '|') + 1);
+                    return unserialize(substr($data, strpos($data, '|') + 1));
                 }
                 return $defValue;
         }
