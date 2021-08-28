@@ -98,8 +98,6 @@ class Start
             $obj,
             Start::$action
         ), array_values($params));
-        // 程序到此结束运行
-        exit();
     }
 
 
