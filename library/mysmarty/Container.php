@@ -15,20 +15,6 @@ class Container
     protected array $flushOnlyVar = [];
 
     /**
-     * 禁止实例化
-     */
-    final private function __construct()
-    {
-    }
-
-    /**
-     * 禁止克隆
-     */
-    final protected function __clone()
-    {
-    }
-
-    /**
      * 获取单一实例
      * @return static
      */
