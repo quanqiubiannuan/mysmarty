@@ -21,6 +21,8 @@ class App
     // 多语言文件
     private string $langFile = RUNTIME_DIR . '/cache/' . MODULE . '/mysmarty_lang.php';
     private array $langData = [];
+    // 当前语言
+    private string $lang;
 
     /**
      * 禁止实例化
@@ -87,6 +89,7 @@ class App
                 }
             }
         }
+        $this->lang = $this->getCurrentLang();
     }
 
     /**
@@ -364,7 +367,7 @@ class App
             }
             $data['home'] = $home;
         } catch (ReflectionException $e) {
-            error(lang('路由文件生成失败'));
+            error(lang('路由文件生成失败') . '：' . $e->getMessage());
         }
         $this->routeData = $data;
         if (createDirByFile($this->routeFile)) {
@@ -474,13 +477,12 @@ class App
      */
     public function getLang(string $name): string
     {
-        $lang = $this->getCurrentLang();
-        if (empty($lang)) {
+        if (empty($this->lang)) {
             return $name;
         }
-        $key1 = $lang . '_' . toDivideName(str_ireplace('\\', '/', Start::$controller), '/');
+        $key1 = $this->lang . '_' . toDivideName(str_ireplace('\\', '/', Start::$controller), '/');
         $key1 = str_ireplace('/', '_', $key1) . '_' . $name;
-        $key2 = $lang . '_' . $name;
+        $key2 = $this->lang . '_' . $name;
         return $this->langData[$key1] ?? $this->langData[$key2] ?? $name;
     }
 

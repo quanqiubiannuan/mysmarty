@@ -48,7 +48,7 @@ class BrowserDownload
     public function setFile(string $file): static
     {
         if (!file_exists($file)) {
-            exit('文件不存在');
+            exit(lang('文件不存在'));
         }
         $this->data = file_get_contents($file);
         $this->mimeType = mime_content_type($file);
@@ -92,7 +92,7 @@ class BrowserDownload
             }
         }
         if (empty($this->data)) {
-            exit('下载文件为空');
+            exit(lang('下载文件为空'));
         }
         header_remove();
         header('Pragma: public');
