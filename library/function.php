@@ -826,7 +826,7 @@ function echoJson(int $status = 1, array|string $data = [], string $msg = '', in
  */
 function json(string|array $data, int $type = JSON_UNESCAPED_UNICODE): void
 {
-    header('content-type:text/json;charset=utf-8');
+    header('content-type:application/json;charset=utf-8');
     if (is_array($data)) {
         echo json_encode($data, $type);
     } else {
