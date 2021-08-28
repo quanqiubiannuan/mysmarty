@@ -8,6 +8,5 @@ class Index extends Controller
 {
     public function home()
     {
-        var_dump(lang('test'));
     }
 }

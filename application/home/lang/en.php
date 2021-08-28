@@ -1,6 +1,5 @@
 <?php
-return [
-    'test' => 'Test',
-    'user' => 'User',
-    'password' => 'Password'
-];
+/**
+ * 返回一维数组
+ */
+return [];
