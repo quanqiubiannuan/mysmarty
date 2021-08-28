@@ -495,11 +495,12 @@ function config(string $name, mixed $defValue = ''): mixed
 /**
  * 500服务端错误
  * @param string $msg 错误信息
- * @param int $code
+ * @param int $code 返回码
+ * @param bool $lang 是否为多语言模式
  */
-function error(string $msg, int $code = 503): void
+function error(string $msg, int $code = 503, bool $lang = true): void
 {
-    tip($msg, '/', $code);
+    tip($msg, '/', $code, $lang);
 }
 
 /**
@@ -554,13 +555,17 @@ function getAbsoluteUrl(): string
 
 /**
  * 提示跳转
- * @param string $msg
- * @param string $url
- * @param int $code
+ * @param string $msg 提示消息
+ * @param string $url 跳转网址
+ * @param int $code 返回码
+ * @param bool $lang 是否为多语言模式
  */
-function tip(string $msg, string $url = '', int $code = 200): void
+function tip(string $msg, string $url = '', int $code = 200, bool $lang = true): void
 {
     http_response_code($code);
+    if ($lang) {
+        $msg = lang($msg);
+    }
     $color = '#b8daff';
     if ($code >= 400) {
         $color = 'red';

@@ -8,5 +8,6 @@ class Index extends Controller
 {
     public function home()
     {
+
     }
 }

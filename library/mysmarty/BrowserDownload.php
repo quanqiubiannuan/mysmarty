@@ -5,7 +5,7 @@ namespace library\mysmarty;
  * 浏览器下载
  * @package library\mysmarty
  */
-class BrowserDownload
+class BrowserDownload extends Container
 {
     // 文件数据
     private string $data;
@@ -16,18 +16,6 @@ class BrowserDownload
     // 下载文件名
     private string $downloadFileName;
     private static ?self $obj = null;
-
-    /**
-     * 获取实例
-     * @return static
-     */
-    public static function getInstance(): static
-    {
-        if (self::$obj === null) {
-            self::$obj = new self();
-        }
-        return self::$obj;
-    }
 
     /**
      * 设置文件数据
@@ -48,7 +36,7 @@ class BrowserDownload
     public function setFile(string $file): static
     {
         if (!file_exists($file)) {
-            exit(lang('文件不存在'));
+            error('文件不存在');
         }
         $this->data = file_get_contents($file);
         $this->mimeType = mime_content_type($file);
@@ -92,16 +80,18 @@ class BrowserDownload
             }
         }
         if (empty($this->data)) {
-            exit(lang('下载文件为空'));
+            error('下载文件为空');
         }
         header_remove();
         header('Pragma: public');
-        header('Content-Type: ' . ($this->mimeType ?: 'application/octet-stream'));
+        header('Content-Type: ' . ($this->mimeType ?? 'application/octet-stream'));
         header('Cache-control: max-age=' . $this->expire);
         header('Content-Disposition: attachment; filename="' . $downloadFileName . '"');
         header('Content-Length: ' . strlen($this->data));
         header('Content-Transfer-Encoding: binary');
         header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $this->expire) . ' GMT');
-        exit($this->data);
+        echo $this->data;
+        $this->_flush();
+        exit();
     }
 }

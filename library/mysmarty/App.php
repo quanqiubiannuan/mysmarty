@@ -6,7 +6,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 
-class App
+class App extends Container
 {
     private static ?self $obj = null;
     // 配置文件
@@ -25,30 +25,11 @@ class App
     private string $lang;
 
     /**
-     * 禁止实例化
+     * 初始化
      */
-    private function __construct()
+    public function _initialize()
     {
-    }
-
-    /**
-     * 禁止克隆
-     */
-    private function __clone()
-    {
-    }
-
-    /**
-     * 获取静态操作对象
-     * @return static
-     */
-    public static function getInstance(): static
-    {
-        if (is_null(static::$obj)) {
-            static::$obj = new static;
-            static::$obj->initData();
-        }
-        return static::$obj;
+        $this->initData();
     }
 
     /**
@@ -69,9 +50,7 @@ class App
             }
         }
         if ($debug) {
-            if (!$this->initConfig()) {
-                exit(lang('配置文件初始化失败'));
-            }
+            $this->initConfig();
             $this->initRoute();
             $this->initLang();
         } else {
@@ -363,19 +342,19 @@ class App
                 }
             }
             if (empty($home)) {
-                error(lang('未定义主页路由'));
+                error('未定义主页路由');
             }
             $data['home'] = $home;
         } catch (ReflectionException $e) {
-            error(lang('路由文件生成失败') . '：' . $e->getMessage());
+            error('路由文件生成失败');
         }
         $this->routeData = $data;
         if (createDirByFile($this->routeFile)) {
             if (!file_put_contents($this->routeFile, serialize($data))) {
-                error(lang('路由文件保存失败'));
+                error('路由文件保存失败');
             }
         } else {
-            error(lang('无法创建路由文件夹'));
+            error('无法创建路由文件夹');
         }
     }
 
